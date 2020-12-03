@@ -47,10 +47,15 @@ size_t strlen(const char* str);
 
 /* <ctype.h> implementation */
 int isalpha(char ch);
+int isalnum(char ch);
 int isblank(char ch);
 int isupper(char ch);
 int islower(char ch);
 int isdigit(char ch);
+int isprint(char ch);
+
+int toupper(char ch);
+int tolower(char ch);
 
 void* memchr(const void* s, int c, size_t len) {
 	const char *_str = (const char*)s;
@@ -94,6 +99,11 @@ int isalpha(char ch) {
 	return (isupper(ch) || islower(ch));
 }
 
+/* powered-by is[alpha-digit]! */
+int isalnum(char ch) {
+  	return (isalpha(c) || isdigit(c));
+}
+
 int isblank(char ch) {
 	return (c == ' ' || c == '\t');
 }
@@ -108,6 +118,22 @@ int islower(char ch) {
 
 int isdigit(char ch) {
 	return (ch >= '0' && ch <= '9');
+}
+
+int isprint(char ch) {
+  	return (ch >= 0x20 && ch <= 0x7E);
+}
+
+int toupper(char ch) {
+	if(islower(ch) == 1) ch = ch - 32; /* a - 32 = A */
+	
+	return ch;
+}
+
+int tolower(char ch) {
+	if(isupper(ch) == 1) ch = ch + 32; /* A + 32 = a */
+	
+	return ch;
 }
 
 #endif // F_LIB_C_H
