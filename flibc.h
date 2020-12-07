@@ -45,6 +45,21 @@ char* strcat(char* str_1, const char* str_2);
 /* strlen */
 size_t strlen(const char* str);
 
+/* <stdio.h> implementation */
+typedef struct __sysio_FILE FILE;
+
+#define stdin (stdin)
+extern FILE* const stdin;
+
+#define stdout (stdout)
+extern FILE* const stdout;
+
+#define stderr (stderr)
+extern FILE* const stderr;
+
+/* <stdarg.h> implementation */
+typedef __builtin_va_list va_list;
+
 /* <ctype.h> implementation */
 int isalpha(char ch);
 int isalnum(char ch);
