@@ -46,6 +46,8 @@ char* strcat(char* str_1, const char* str_2);
 size_t strlen(const char* str);
 
 /* <stdio.h> implementation */
+#define EOF (-1)
+
 typedef struct __sysio_FILE FILE;
 
 #define stdin (stdin)
@@ -59,6 +61,11 @@ extern FILE* const stderr;
 
 /* <stdarg.h> implementation */
 typedef __builtin_va_list va_list;
+
+#define va_start(ap, param) __builtin_va_start((ap), (param))
+#define va_arg(ap, type)    __builtin_va_arg((ap), (type))
+#define va_end(ap)          __builtin_va_end((ap))
+#define va_copy(dest, src)  __builtin_va_copy((dest), (src))
 
 /* <ctype.h> implementation */
 int isalpha(char ch);
