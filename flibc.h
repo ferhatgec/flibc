@@ -27,29 +27,48 @@
 
 /* <stddef.h> implementation */
 /* size_t */
-typedef unsigned long size_t;
+
+typedef __SIZE_TYPE__ size_t;
 
 /* ptrdiff_t */
-typedef signed long ptrdiff_t;
+typedef __PTRDIFF_TYPE__ ptrdiff_t;
 
+#ifndef NULL /* make sure NULL isn't already defined */
 #define NULL ((void*)0)
+#endif
 
 /* <string.h> implementation */
 
+/* 
+changed functions to be inline
+for better performance
+
+this is because inline substitute's the code in the code directly
+rather than running the function as a functions
+
+this helps the compiler with optimization
+*/
+
 /* memchr */
-void* memchr(const void* s, int c, size_t len); 
+inline void* memchr(const void* s, int c, size_t len); 
 
 /* strcat */
-char* strcat(char* str_1, const char* str_2);
+inline char* strcat(char* str_1, const char* str_2);
 
 /* strlen */
-size_t strlen(const char* str);
+inline size_t strlen(const char* str);
 
 /* <stdio.h> implementation */
+#ifndef EOF /* make sure EOF isn't already defined */
 #define EOF (-1)
+#endif
 
-typedef struct __sysio_FILE FILE;
+/* use the same base _IO_FILE as the standard library does */
+struct _IO_FILE;
+typedef struct _IO_FILE FILE;
 
+/* make sure stdin, stdout and stderr aren't redefined */
+#ifndef stdin
 #define stdin (stdin)
 extern FILE* const stdin;
 
@@ -58,6 +77,7 @@ extern FILE* const stdout;
 
 #define stderr (stderr)
 extern FILE* const stderr;
+#endif
 
 /* <stdarg.h> implementation */
 typedef __builtin_va_list va_list;
@@ -68,94 +88,104 @@ typedef __builtin_va_list va_list;
 #define va_copy(dest, src)  __builtin_va_copy((dest), (src))
 
 /* <ctype.h> implementation */
-int isalpha(char ch);
-int isalnum(char ch);
-int isblank(char ch);
-int isupper(char ch);
-int islower(char ch);
-int isdigit(char ch);
-int isprint(char ch);
 
-int toupper(char ch);
-int tolower(char ch);
+/* 
+change char to int
+this is it matches the standard library's define
+*/
+inline int isalpha(int ch);
+inline int isalnum(int ch);
+inline int isblank(int ch);
+inline int isupper(int ch);
+inline int islower(int ch);
+inline int isdigit(int ch);
+inline int isprint(int ch);
+
+inline int toupper(int ch);
+inline int tolower(int ch);
+
+/* 
+most single-header files use this to seperate source code from define code
+
+although this library is kinda small, it's still nice to have
+*/
+#ifdef F_LIB_C_IMPLEMENTATION
 
 void* memchr(const void* s, int c, size_t len) {
+	/* removed N, you can just use _nstr for everything! :) */
 	const char *_str = (const char*)s;
 	
-	size_t n = 0;
-	
-	while(n < len) {
-		n++;
+	while(((void*)_str - s) < len) {
+		_str++;
 		
-		if(_str[n] == c)
-			return (void*)&_str[n];
+		if(*_str == c)
+			return (void*)_str;
 	}
 	
 	return (NULL);
 }
 
+/* just simplified this code a little */
 char* strcat(char* str_1, const char* str_2) {
 	char *copy_str_1 = str_1;
 
-    while(*str_1)
-      str_1++;
+	str_1 += strlen(str_1);
       
-    while (*str_1++ = *str_2++)
-      ;
+    while (*str_1++ = *str_2++);
       
     return copy_str_1;
 }
 
-size_t strlen(const char* const str) {
-    size_t i;
-    
-    for(i = 0; str[i] != '\0'; i++)
-    	;
-    
-    return i;
+size_t strlen(const char* str) {
+	/* removed index check, you can just iterate using the char* */
+	char* s;
+	for (s = (char*)str; *s; s++);
+
+	return (s - str);
 }
 
 
 /* powered-by is[lower-upper]! */
-int isalpha(char ch) {
+int isalpha(int ch) {
 	return (isupper(ch) || islower(ch));
 }
 
 /* powered-by is[alpha-digit]! */
-int isalnum(char ch) {
-  	return (isalpha(c) || isdigit(c));
+int isalnum(int ch) {
+  	return (isalpha(ch) || isdigit(ch));
 }
 
-int isblank(char ch) {
-	return (c == ' ' || c == '\t');
+int isblank(int ch) {
+	return (ch == ' ' || ch == '\t');
 }
 
-int isupper(char ch) {
+int isupper(int ch) {
 	return (ch >= 'A' && ch <= 'Z');
 }
 
-int islower(char ch) {
+int islower(int ch) {
 	return (ch >= 'a' && ch <= 'z');
 }
 
-int isdigit(char ch) {
+int isdigit(int ch) {
 	return (ch >= '0' && ch <= '9');
 }
 
-int isprint(char ch) {
+int isprint(int ch) {
   	return (ch >= 0x20 && ch <= 0x7E);
 }
 
-int toupper(char ch) {
+int toupper(int ch) {
 	if(islower(ch) == 1) ch = ch - 32; /* a - 32 = A */
 	
 	return ch;
 }
 
-int tolower(char ch) {
+int tolower(int ch) {
 	if(isupper(ch) == 1) ch = ch + 32; /* A + 32 = a */
 	
 	return ch;
 }
 
+#endif /* F_LIB_C_IMPLEMENTATION */
 #endif // F_LIB_C_H
